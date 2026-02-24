@@ -122,7 +122,6 @@
             transition: 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
             transform: translateZ(0);
             opacity: 1 !important;
-            transform: none !important;
             animation: none !important;
         }
         .app-item:active {
@@ -147,9 +146,6 @@
         .download-btn.test {
             background: linear-gradient(135deg, #666, #444);
             cursor: not-allowed;
-        }
-        .download-btn.test:active {
-            transform: none;
         }
     </style>
 </head>
@@ -185,7 +181,6 @@
 
     const testFiles = Array.from({ length: 15 }, (_, i) => ({
         name: `测试项 ${i+1}`,
-        path: "test",
         isTest: true
     }));
 
@@ -251,17 +246,21 @@
 
     function renderAppList() {
         if (!checkVersion()) return;
-
         let listHtml = "";
-        appList.forEach((item) => {
-            const isTest = item.isTest ? 'class="download-btn test"' : 'class="download-btn"';
-            const link = item.isTest ? 'onclick="alert(\'测试模式，无法下载\')"' : `href="${item.path}" download`;
-
-            listHtml += `
-            <div class="app-item">
-                <span class="app-name">${item.name}</span>
-                <a ${link} ${isTest}></a>
-            </div>`;
+        appList.forEach(item => {
+            if (item.isTest) {
+                listHtml += `
+                <div class="app-item">
+                    <span class="app-name">${item.name}</span>
+                    <a class="download-btn test" onclick="alert('测试模式，无法下载')">下载</a>
+                </div>`;
+            } else {
+                listHtml += `
+                <div class="app-item">
+                    <span class="app-name">${item.name}</span>
+                    <a class="download-btn" href="${item.path}" download>下载</a>
+                </div>`;
+            }
         });
         appListContent.innerHTML = listHtml;
     }
