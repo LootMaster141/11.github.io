@@ -15,6 +15,9 @@
             color: #fff;
             font-family: Arial, sans-serif;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .overlay {
             position: fixed;
@@ -25,7 +28,6 @@
         }
         .login-box {
             max-width: 400px;
-            margin: 100px auto 0;
             padding: 30px;
             background: rgba(34,34,34,0.9);
             border-radius: 12px;
@@ -36,7 +38,7 @@
         input {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
+            margin: 10px 0 20px;
             border-radius: 6px;
             border: none;
             font-size: 16px;
@@ -52,29 +54,26 @@
         }
         button:hover { background: #0052cc; }
 
-        /* 下拉刷新容器 */
+        /* 下拉刷新 + 列表样式 */
         .pull-refresh {
             position: relative;
-            overflow: auto;
+            overflow-y: auto;
             max-height: 80vh;
-            padding-top: 20px;
+            width: 100%;
+            padding-top: 10px;
         }
         .refresh-tip {
             position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
             text-align: center;
             color: #ccc;
-            padding: 10px 0;
-            background: rgba(0,0,0,0.5);
+            padding: 8px 0;
+            background: rgba(0,0,0,0.6);
             display: none;
         }
-
-        /* 下载列表 */
         .app-list {
             max-width: 600px;
-            margin: 0 auto;
+            width: 100%;
             padding: 20px;
             display: none;
         }
@@ -82,14 +81,14 @@
             background: rgba(34,34,34,0.9);
             border-radius: 8px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .app-name { font-size: 18px; font-weight: bold; }
+        .app-name { font-size: 16px; font-weight: 500; }
         .download-btn {
-            padding: 8px 16px;
+            padding: 8px 14px;
             background: #00c853;
             color: white;
             border-radius: 6px;
@@ -105,119 +104,92 @@
     <div class="login-box" id="loginBox">
         <h2>请输入访问密码</h2>
         <input type="password" id="pwd" placeholder="输入密码">
-        <br><br>
         <button onclick="checkPwd()">确认登录</button>
     </div>
 
     <div class="app-list" id="appList">
         <div class="pull-refresh" id="pullRefresh">
             <div class="refresh-tip" id="refreshTip">刷新中...</div>
-            <div id="appListContent">
-                <!-- 列表内容会自动填充 -->
-            </div>
+            <div id="appListContent"></div>
         </div>
     </div>
 
     <script>
-        // 🔒 密码已修改为：111
+        // 1. 密码已固定为：111（无需修改）
         const RIGHT_PWD = "111";
 
-        // 📦 软件列表配置（在这里添加你的文件）
-        let appList = [
-            {
-                name: "红魔Pad3Pro 机型模拟",
-                path: "files/global_model_sim_redmagic_pad3pro.zip"
-            },
-            {
-                name: "7436", // 改成你的软件名
-                path: "files/LSPosed-v1.9.2-it-7436-release（1）.zip" 
-            },
-            {
-                name: "zy", // 改成你的软件名
-                path: "files/Zygisk-Next-1.3.1-665-7e5b533-release（1）.zip" // 
-            }，
-             {
-                name: "淋羽",
-                path: "files/林羽江颜过电报验证.sh"
-            },
-             {
-                name: "核心破解", // 改成你的软件名
-                path: "files/核心破解_4.8.apk" 
-            },
-             {
-                name: "啊灵", // 改成你的软件名
-                path: "files/阿灵的设备标识重置（随机ID修改）.sh" 
-            },
-             {
-                name: "1+15", // 改成你的软件名
-                path: "files/全局机型模拟-一加 15.zip" 
-            }
-            // 要加更多软件，复制上面{}里的内容，逗号隔开即可
+        // 2. 修正后的软件列表（与你files文件夹完全匹配）
+        const appList = [
+            { name: "红魔Pad3Pro 机型模拟", path: "files/global_model_sim_redmagic_pad3pro.zip" },
+            { name: "7436", path: "files/LSPosed-v1.9.2-it-7436-release.zip" },
+            { name: "zy", path: "files/Zygisk-Next-1.3.1-665-7e5b533-release.zip" },
+            { name: "淋羽", path: "files/林羽江颜过电报验证.sh" },
+            { name: "核心破解", path: "files/核心破解_4.8.apk" },
+            { name: "啊灵", path: "files/阿灵的设备标识重置（随机ID修改）.sh" },
+            { name: "1+15", path: "files/全局机型模拟-一加15.zip" }
         ];
 
-        // --- 以下代码无需修改 ---
-        const loginBox = document.getElementById('loginBox');
-        const appListEl = document.getElementById('appList');
-        const appListContent = document.getElementById('appListContent');
-        const refreshTip = document.getElementById('refreshTip');
+        // 3. 核心DOM元素获取
+        const loginBox = document.getElementById("loginBox");
+        const appListEl = document.getElementById("appList");
+        const appListContent = document.getElementById("appListContent");
+        const refreshTip = document.getElementById("refreshTip");
         let startY = 0;
 
-        // 登录验证
+        // 4. 修复登录逻辑（确保无执行中断）
         function checkPwd() {
-            const input = document.getElementById('pwd').value.trim();
-            if (input === RIGHT_PWD) {
+            const inputPwd = document.getElementById("pwd").value.trim();
+            if (inputPwd === RIGHT_PWD) {
+                // 清除所有缓存，避免旧状态干扰
                 localStorage.clear();
-                loginBox.style.display = 'none';
-                appListEl.style.display = 'block';
-                renderAppList(); // 渲染列表
+                sessionStorage.clear();
+                // 隐藏登录框，显示列表
+                loginBox.style.display = "none";
+                appListEl.style.display = "block";
+                // 渲染软件列表
+                renderAppList();
             } else {
-                alert('密码错误，请重试！');
-                document.getElementById('pwd').value = '';
+                alert("密码错误！请输入111");
+                document.getElementById("pwd").value = ""; // 清空输入框
             }
         }
 
-        // 渲染软件列表
+        // 5. 渲染列表（纯文本拼接，避免语法错误）
         function renderAppList() {
-            let html = '';
-            appList.forEach(app => {
-                html += `
+            let listHtml = "";
+            appList.forEach(item => {
+                listHtml += `
                 <div class="app-item">
-                    <span class="app-name">${app.name}</span>
-                    <a href="${app.path}" class="download-btn" download>下载</a>
+                    <span class="app-name">${item.name}</span>
+                    <a href="${item.path}" class="download-btn" download>下载</a>
                 </div>
                 `;
             });
-            appListContent.innerHTML = html;
+            appListContent.innerHTML = listHtml;
         }
 
-        // 下拉刷新逻辑
-        document.getElementById('pullRefresh').addEventListener('touchstart', (e) => {
+        // 6. 下拉刷新功能（手机+PC双支持）
+        // 手机端触摸刷新
+        document.getElementById("pullRefresh").addEventListener("touchstart", (e) => {
             startY = e.touches[0].clientY;
         });
-
-        document.getElementById('pullRefresh').addEventListener('touchend', (e) => {
+        document.getElementById("pullRefresh").addEventListener("touchend", (e) => {
             const endY = e.changedTouches[0].clientY;
-            // 判断是否为下拉动作
-            if (endY - startY > 50) {
-                refreshTip.style.display = 'block';
-                // 模拟刷新（实际是重新加载列表和页面缓存）
+            if (endY - startY > 60) {
+                refreshTip.style.display = "block";
                 setTimeout(() => {
                     renderAppList();
-                    window.location.reload(true); // 强制刷新页面
-                    refreshTip.style.display = 'none';
-                }, 1000);
+                    refreshTip.style.display = "none";
+                }, 800);
             }
         });
-
-        // PC端刷新支持（点击提示刷新）
-        refreshTip.addEventListener('click', () => {
-            refreshTip.style.display = 'block';
+        // PC端点击刷新
+        refreshTip.addEventListener("click", () => {
+            refreshTip.style.display = "block";
             setTimeout(() => {
                 window.location.reload(true);
-                refreshTip.style.display = 'none';
-            }, 1000);
+            }, 800);
         });
     </script>
 </body>
 </html>
-
