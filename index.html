@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>资源库</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
         body {
-            background-image: url('files/bg.png');
+            /* 修复背景图：使用绝对路径，确保在任何环境都能加载 */
+            background-image: url('https://raw.githubusercontent.com/LootMaster141/11.github.io/main/files/bg.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -15,24 +21,28 @@
             color: #fff;
             font-family: Arial, sans-serif;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
         }
         .overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.5);
             z-index: -1;
         }
         .login-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             max-width: 400px;
+            width: 90%;
             padding: 30px;
-            background: rgba(34,34,34,0.9);
+            background: rgba(34,34,34,0.7);
             border-radius: 12px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         h2 { margin-bottom: 20px; font-size: 22px; }
         input {
@@ -42,7 +52,10 @@
             border-radius: 6px;
             border: none;
             font-size: 16px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
         }
+        input::placeholder { color: #ccc; }
         button {
             padding: 12px 25px;
             background: #0066ff;
@@ -54,13 +67,25 @@
         }
         button:hover { background: #0052cc; }
 
-        /* 下拉刷新 + 列表样式 */
+        .app-list {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            display: none;
+            overflow: hidden;
+        }
         .pull-refresh {
             position: relative;
-            overflow-y: auto;
-            max-height: 80vh;
             width: 100%;
-            padding-top: 10px;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
         .refresh-tip {
             position: sticky;
@@ -68,34 +93,38 @@
             text-align: center;
             color: #ccc;
             padding: 8px 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.4);
+            border-radius: 0 0 8px 8px;
             display: none;
-        }
-        .app-list {
-            max-width: 600px;
-            width: 100%;
-            padding: 20px;
-            display: none;
+            margin: 0 auto 10px;
+            width: 50%;
         }
         .app-item {
-            background: rgba(34,34,34,0.9);
+            background: rgba(34,34,34,0.55);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transform: translateZ(0);
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        .app-name { font-size: 16px; font-weight: 500; }
+        .app-name { 
+            font-size: 16px; 
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
         .download-btn {
             padding: 8px 14px;
-            background: #00c853;
+            background: rgba(0,200,83,0.85);
             color: white;
             border-radius: 6px;
             text-decoration: none;
             font-size: 14px;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
         }
-        .download-btn:hover { background: #00b248; }
+        .download-btn:hover { background: rgba(0,178,72,0.95); }
     </style>
 </head>
 <body>
@@ -115,10 +144,9 @@
     </div>
 
     <script>
-        // 1. 密码已固定为：111（无需修改）
         const RIGHT_PWD = "111";
 
-        // 2. 修正后的软件列表（与你files文件夹完全匹配）
+        // 已移除“啊灵”的下载项
         const appList = [
             { name: "红魔Pad3Pro 机型模拟", path: "files/global_model_sim_redmagic_pad3pro.zip" },
             { name: "7436", path: "files/LSPosed-v1.9.2-it-7436-release.zip" },
@@ -128,32 +156,26 @@
             { name: "1+15", path: "files/全局机型模拟-一加15.zip" }
         ];
 
-        // 3. 核心DOM元素获取
         const loginBox = document.getElementById("loginBox");
         const appListEl = document.getElementById("appList");
         const appListContent = document.getElementById("appListContent");
         const refreshTip = document.getElementById("refreshTip");
         let startY = 0;
 
-        // 4. 修复登录逻辑（确保无执行中断）
         function checkPwd() {
             const inputPwd = document.getElementById("pwd").value.trim();
             if (inputPwd === RIGHT_PWD) {
-                // 清除所有缓存，避免旧状态干扰
                 localStorage.clear();
                 sessionStorage.clear();
-                // 隐藏登录框，显示列表
                 loginBox.style.display = "none";
                 appListEl.style.display = "block";
-                // 渲染软件列表
                 renderAppList();
             } else {
-                alert("密码错误！请输入111");
-                document.getElementById("pwd").value = ""; // 清空输入框
+                alert("密码错误！请输入 111");
+                document.getElementById("pwd").value = "";
             }
         }
 
-        // 5. 渲染列表（纯文本拼接，避免语法错误）
         function renderAppList() {
             let listHtml = "";
             appList.forEach(item => {
@@ -167,11 +189,10 @@
             appListContent.innerHTML = listHtml;
         }
 
-        // 6. 下拉刷新功能（手机+PC双支持）
-        // 手机端触摸刷新
         document.getElementById("pullRefresh").addEventListener("touchstart", (e) => {
             startY = e.touches[0].clientY;
-        });
+        }, { passive: true });
+
         document.getElementById("pullRefresh").addEventListener("touchend", (e) => {
             const endY = e.changedTouches[0].clientY;
             if (endY - startY > 60) {
@@ -179,17 +200,16 @@
                 setTimeout(() => {
                     renderAppList();
                     refreshTip.style.display = "none";
-                }, 800);
+                }, 600);
             }
-        });
-        // PC端点击刷新
+        }, { passive: true });
+
         refreshTip.addEventListener("click", () => {
             refreshTip.style.display = "block";
             setTimeout(() => {
                 window.location.reload(true);
-            }, 800);
+            }, 600);
         });
     </script>
 </body>
 </html>
-
