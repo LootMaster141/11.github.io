@@ -16,11 +16,27 @@
             overflow: hidden;
             touch-action: manipulation;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #101015;
             color: #fff;
         }
 
-        /* 120fps 高刷解锁核心 */
+        body {
+            background: #101015;
+            background-image: url('files/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: -1;
+        }
+
+        /* 120fps 高刷丝滑核心 */
         .pull-refresh {
             width: 100%;
             height: 100%;
@@ -44,13 +60,14 @@
             background: rgba(30,30,40,0.8);
             border-radius: 20px;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
             animation: fadeInScale 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         @keyframes fadeInScale {
             from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
+
         .login-box h2 {
             margin-bottom: 24px;
             font-size: 22px;
@@ -132,6 +149,8 @@
     </style>
 </head>
 <body>
+
+<div class="overlay"></div>
 
 <div class="login-box" id="loginBox">
     <h2>请输入密码</h2>
