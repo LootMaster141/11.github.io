@@ -6,7 +6,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            /* 背景图路径：指向 files 文件夹里的 bg.png */
             background-image: url('files/bg.png');
             background-size: cover;
             background-position: center;
@@ -21,7 +20,6 @@
             justify-content: center;
             align-items: center;
         }
-        /* 半透明模糊背景，保证文字清晰 */
         .overlay {
             position: fixed;
             top: 0; left: 0;
@@ -35,7 +33,6 @@
             background: rgba(34,34,34,0.9);
             border-radius: 12px;
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
         h2 { margin-bottom: 20px; font-size: 22px; }
         input {
@@ -66,54 +63,43 @@
             border-radius: 6px;
             text-decoration: none;
         }
-        .download:hover { background: #00b248; }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
+<div class="overlay"></div>
 
-    <div class="box" id="loginBox">
-        <h2>请输入访问密码</h2>
-        <input type="password" id="pwd" placeholder="输入密码">
-        <br><br>
-        <button onclick="checkPwd()">确认登录</button>
-    </div>
+<div class="box" id="loginBox">
+    <h2>请输入访问密码</h2>
+    <input type="password" id="pwd" placeholder="输入密码">
+    <br><br>
+    <button onclick="checkPwd()">确认登录</button>
+</div>
 
-    <div class="box content" id="mainContent">
-        <h2>资源库</h2>
-        <!-- 下载链接：对应你重命名后的压缩包 -->
-        <a href="files/global_model_sim_redmagic_pad3pro.zip" class="download" download>
-            点击下载 红魔Pad3Pro 机型模拟
-        </a>
-    </div>
+<div class="content" id="mainContent">
+    <h2>资源库</h2>
+    <a href="files/global_model_sim_redmagic_pad3pro.zip" class="download" download>点击下载文件</a>
+</div>
 
-    <script>
-        // 🔒 密码设置区
-        const RIGHT_PWD = "188";
-        
-        // 强制清除旧登录状态，改密码必生效
-        localStorage.removeItem("auth_ok");
+<script>
+// ======================================
+// 🔴 你以后只改这里的密码，改完立刻生效！
+const RIGHT_PWD = "1887415157yy";
+// ======================================
 
-        function checkPwd() {
-            let input = document.getElementById("pwd").value.trim();
-            if (input === RIGHT_PWD) {
-                localStorage.setItem("auth_ok", "true");
-                document.getElementById("loginBox").style.display = "none";
-                document.getElementById("mainContent").style.display = "block";
-            } else {
-                alert("密码错误，请重试！");
-                document.getElementById("pwd").value = ""; // 清空输入框
-            }
-        }
+// 强制清空所有旧登录（关键！）
+localStorage.clear();
+sessionStorage.clear();
+document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-        // 页面加载验证
-        window.onload = function() {
-            if (localStorage.getItem("auth_ok") === "true") {
-                document.getElementById("loginBox").style.display = "none";
-                document.getElementById("mainContent").style.display = "block";
-            }
-        }
-    </script>
+function checkPwd() {
+    let input = document.getElementById("pwd").value;
+    if (input === RIGHT_PWD) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+    } else {
+        alert("密码错误");
+    }
+}
+</script>
 </body>
 </html>
-
