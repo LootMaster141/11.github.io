@@ -225,6 +225,17 @@
     `;
     document.head.appendChild(style);
 
+    // 🔽 APP 下载兼容函数（只加了这个，别的全不动）
+    function downloadFile(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = url.split('/').pop();
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 100);
+    }
+
     function renderAppList() {
         if (!checkVersion()) return;
         let listHtml = "";
@@ -239,7 +250,7 @@
                 listHtml += `
                 <div class="app-item">
                     <span class="app-name">${item.name}</span>
-                    <a class="download-btn" href="${item.path}" download>下载</a>
+                    <a class="download-btn" href="${item.path}" download onclick="downloadFile('${item.path}')">下载</a>
                 </div>`;
             }
         });
